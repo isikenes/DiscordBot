@@ -12,10 +12,6 @@ token=os.environ.get('token')
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix='/', intents=intents)
 
-@bot.event
-async def on_ready():
-    await bot.tree.sync()
-
 def getWaifu():
     response = requests.get("https://api.waifu.pics/sfw/waifu")
     json_data = response.json()
