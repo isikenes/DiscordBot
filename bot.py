@@ -100,4 +100,9 @@ async def hava(ctx):
     hava = f"Eskişehir'de hava durumu:\n{temperature_celsius} C°\n{getHavaMetni(weather_condition)}"
     await ctx.send(hava)
 
+@bot.command()
+async def kys(ctx):
+    await ctx.send("Sayonara")
+    await bot.close()
+
 bot.run(token=token)
