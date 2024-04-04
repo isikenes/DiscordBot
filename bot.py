@@ -1,24 +1,17 @@
 import discord
 import os
-import time
-import random
-import aiohttp
 import io
 import requests
+from discord.ext import commands
 
 token=os.environ.get('token')
 
-intents = discord.Intents.default()
-intents.message_content = True 
-client = discord.Client(intents=intents)
+intents = discord.Intents.all()
+bot = commands.Bot(command_prefix='/', intents=intents)
 
-@client.event
+@bot.event
 async def on_ready():
-    print(f"Bot logged in as {client.user}")
-    
-
-iblisler=['Tilki İblisi','Gelecek İblisi','Yılan İblisi','Zombi İblisi','Silah İblisi']
-
+    await bot.tree.sync()
 
 def getWaifu():
     response = requests.get("https://api.waifu.pics/sfw/waifu")
@@ -81,35 +74,30 @@ def getHavaMetni(kod):
     return metin.get(kod, "Bilinmeyen")
 
 
-@client.event
-async def on_message(msg):
-    if msg.author!=client.user:
-        if msg.content.lower().startswith("/makima"):
-            await msg.channel.send(f"Emrediyorum, benimle anlaşma yapmak istediğini söyle {msg.author.display_name}-kun.")
-            url = "https://pbs.twimg.com/media/EbDKI4gX0AUXzSO.jpg"
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url) as resp:
-                    img = await resp.read()
-                    with io.BytesIO(img) as file:
-                        await msg.channel.send(file=discord.File(file, "makima.png"))
-            
-        if msg.content.lower().startswith("seninle anlaşma yapmak istiyorum"):
-            await msg.channel.send(f"Makima yetenek etkinleştirdi: şunların yeteneklerini kullan. {msg.author.display_name}-kun'un {random.choice(iblisler)} ile ölene kadar geçerli anlaşması.")
+@bot.command()
+async def makima(ctx):
+    await ctx.send(f"Emrediyorum, benimle anlaşma yapmak istediğini söyle {ctx.author.name}-kun!")
+    await ctx.send("https://pbs.twimg.com/media/EbDKI4gX0AUXzSO.jpg")
 
-    if msg.content.startswith("/waifu"):
-        await msg.channel.send(getWaifu())
+@bot.command()
+async def waifu(ctx):
+    await ctx.send(getWaifu())
 
-    if msg.content.startswith("/nsfw"):
-        if(msg.channel.nsfw):
-            await msg.channel.send(getNSFW())
+@bot.command()
+async def nsfw(ctx):
+    if ctx.channel.nsfw:
+        await ctx.send(getNSFW())
+    else:
+        await ctx.send("This command can only be used in NSFW channels.")
 
-    if msg.content.startswith("/avatar"):
-        await msg.channel.send(msg.author.avatar.url)
+@bot.command()
+async def avatar(ctx):
+    await ctx.send(ctx.author.avatar.url)
 
-    if msg.content.startswith("/hava"):
-        temperature_celsius, weather_condition = getHava()
-        hava=f"Eskişehir'de hava durumu:\n{temperature_celsius} C°\n{getHavaMetni(weather_condition)}"
-        await msg.channel.send(hava)
+@bot.command()
+async def hava(ctx):
+    temperature_celsius, weather_condition = getHava()
+    hava = f"Eskişehir'de hava durumu:\n{temperature_celsius} C°\n{getHavaMetni(weather_condition)}"
+    await ctx.send(hava)
 
-
-client.run(token)
+bot.run(token=token)
