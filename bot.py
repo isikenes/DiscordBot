@@ -88,7 +88,7 @@ async def nsfw(ctx):
     if ctx.channel.nsfw:
         await ctx.send(getNSFW())
     else:
-        await ctx.send("This command can only be used in NSFW channels.")
+        await ctx.send("Bu komut sadece NSFW kanallarında çalışır!")
 
 @bot.command()
 async def avatar(ctx):
