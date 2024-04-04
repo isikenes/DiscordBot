@@ -100,7 +100,8 @@ async def on_message(msg):
         await msg.channel.send(getWaifu())
 
     if msg.content.startswith("/nsfw"):
-        await msg.channel.send(getNSFW())
+        if(msg.channel.nsfw):
+            await msg.channel.send(getNSFW())
 
     if msg.content.startswith("/avatar"):
         await msg.channel.send(msg.author.avatar.url)
