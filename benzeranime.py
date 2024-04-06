@@ -18,7 +18,7 @@ def find_similar_plots(selected_anime_name):
             break
 
     if selected_index is None:
-        return "Anime bulunamadı. Lütfen tekrar deneyin."
+        return selected_anime_name," bulunamadı!"
         
 
     selected_plot = anime_plots[selected_index]
@@ -41,10 +41,11 @@ def find_similar_plots(selected_anime_name):
             count += 1
             if count >= 5:
                 break
-    return similar_anime_names
+
+    similars=", ".join(similar_anime_names)
+    return anime_names[selected_index],similars
 
 
-def benzeranime(name):
-    out=find_similar_plots(name)
-    out=", ".join(out)
-    return out
+def benzeranimeoner(ctx, *, name: str):
+    n,out=find_similar_plots(name)
+    return n,out
