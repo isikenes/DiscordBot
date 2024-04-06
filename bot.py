@@ -1,4 +1,5 @@
 import discord
+from discord.ext import commands
 import os
 import requests
 from keep_alive import keep_alive
@@ -15,7 +16,7 @@ intents.messages = True
 intents.message_content = True
 intents.members = True
 
-bot = discord.Bot()
+bot = commands.Bot(command_prefix="/",intents=intents)
 
 
 def get_waifu():
