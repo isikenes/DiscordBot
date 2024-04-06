@@ -15,7 +15,7 @@ intents.messages = True
 intents.message_content = True
 intents.members = True
 
-bot = discord.Bot(command_prefix="/", intents=intents)
+bot = discord.Bot()
 
 
 def get_waifu():
