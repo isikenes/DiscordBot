@@ -1,44 +1,45 @@
 import discord
 import os
-import io
 import requests
 from discord.ext import commands
 from keep_alive import keep_alive
-from benzeranime import benzeranimeoner
+import random
 
 keep_alive()
 
 token=os.environ.get('token')
 
 intents = discord.Intents.default()
-intents.guilds=True
-intents.guild_messages=True
-intents.messages=True
-intents.message_content=True
-intents.members=True
+intents.guilds = True
+intents.guild_messages = True
+intents.messages = True
+intents.message_content = True
+intents.members = True
 
-bot = commands.Bot(command_prefix='/', intents=intents)
+bot = commands.Bot(command_prefix="/", intents=intents)
 
-def getWaifu():
+
+def get_waifu():
     response = requests.get("https://api.waifu.pics/sfw/waifu")
     json_data = response.json()
-    url = json_data['url']
+    url = json_data["url"]
     return url
 
 
-def getNSFW():
+def get_nsfw():
     response = requests.get("https://api.waifu.pics/nsfw/waifu")
     json_data = response.json()
-    url = json_data['url']
+    url = json_data["url"]
     return url
 
-def getHava():
+
+def get_hava():
     base_url = "https://api.open-meteo.com/v1/forecast"
     params = {
         "latitude": 39.8152,
         "longitude": 30.5323,
         "current": ["temperature_2m", "weather_code"],
-	    "forecast_days": 1
+        "forecast_days": 1,
     }
     response = requests.get(base_url, params=params)
     data = response.json()
@@ -46,7 +47,8 @@ def getHava():
     weather_condition = data["current"]["weather_code"]
     return temperature_celsius, weather_condition
 
-def getHavaMetni(kod):
+
+def get_hava_metni(kod):
     metin = {
         0: "Açık gökyüzü",
         1: "Genellikle açık gökyüzü",
@@ -75,45 +77,135 @@ def getHavaMetni(kod):
         86: "Kar Yağışı: Şiddetli yoğunluk",
         95: "Gökgürültülü Fırtına: Hafif veya orta yoğunluk",
         96: "Gökgürültülü Fırtına: Hafif dolu",
-        99: "Gökgürültülü Fırtına: Şiddetli dolu"
+        99: "Gökgürültülü Fırtına: Şiddetli dolu",
     }
     return metin.get(kod, "Bilinmeyen")
 
 
+def get_random_anime():
+    anime_id = random.randint(1, 14000)
+    response = requests.get(f"https://kitsu.io/api/edge/anime/{anime_id}")
+    json_data = response.json()
+    return json_data
+
+def extract_data(json_data):
+    try:
+        title = json_data['data']['attributes']['canonicalTitle']
+        poster_image = json_data['data']['attributes']['posterImage']['original']
+        description = json_data['data']['attributes']['description']
+        episode_count = json_data['data']['attributes']['episodeCount']
+        rating_rank = json_data['data']['attributes']['ratingRank']
+        return title, poster_image, description, episode_count, rating_rank
+    except KeyError:
+        return None
+    
+def get_anime_data(json_data):
+    try:
+        title = json_data['data'][0]['attributes']['canonicalTitle']
+        poster_image = json_data['data'][0]['attributes']['posterImage']['original']
+        description = json_data['data'][0]['attributes']['description']
+        episode_count = json_data['data'][0]['attributes']['episodeCount']
+        rating_rank = json_data['data'][0]['attributes']['ratingRank']
+        return title, poster_image, description, episode_count, rating_rank
+    except (KeyError, IndexError):
+        return None
+
+def process_data():
+    while True:
+        json_data = get_random_anime()
+        data = extract_data(json_data)
+        if data is not None:
+            return data
+        
+def search_anime(query):
+    url = f"https://kitsu.io/api/edge/anime?filter[text]={query}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        return data
+    else:
+        return None
+
 @bot.command()
 async def makima(ctx):
-    await ctx.send(f"Emrediyorum, benimle anlaşma yapmak istediğini söyle {ctx.author.name}-kun!")
-    await ctx.send("https://pbs.twimg.com/media/EbDKI4gX0AUXzSO.jpg")
+    embed = discord.Embed(
+        title=f"Emrediyorum, benimle anlaşma yapmak istediğini söyle {ctx.author.name}-kun!",
+        color=0xE74C3C,
+    )
+    embed.set_image(url="https://pbs.twimg.com/media/EbDKI4gX0AUXzSO.jpg")
+
+    await ctx.send(embed=embed)
+
 
 @bot.command()
 async def waifu(ctx):
-    await ctx.send(getWaifu())
+    embed = discord.Embed(color=0xE74C3C)
+    embed.set_image(url=get_waifu())
+
+    await ctx.send(embed=embed)
+
 
 @bot.command()
 async def nsfw(ctx):
     if ctx.channel.nsfw:
-        await ctx.send(getNSFW())
+        embed = discord.Embed(color=0xE74C3C)
+        embed.set_image(url=get_nsfw())
+        await ctx.send(embed=embed)
     else:
-        await ctx.send("Bu komut sadece NSFW kanallarında çalışır!")
+        embed = discord.Embed(
+            description="Bu komut sadece NSFW kanallarında çalışır!", color=0xE74C3C
+        )
+        await ctx.send(embed=embed)
+
 
 @bot.command()
 async def avatar(ctx):
-    await ctx.send(ctx.author.avatar.url)
+    embed = discord.Embed(color=0xE74C3C)
+    embed.set_image(url=ctx.author.avatar.url)
+    await ctx.send(embed=embed)
+
 
 @bot.command()
 async def hava(ctx):
-    temperature_celsius, weather_condition = getHava()
-    hava = f"Eskişehir'de hava durumu:\n{temperature_celsius} C°\n{getHavaMetni(weather_condition)}"
-    await ctx.send(hava)
+    temperature_celsius, weather_condition = get_hava()
+    hava = f"{temperature_celsius} C°\n{get_hava_metni(weather_condition)}"
+    embed = discord.Embed(
+        color=0xE74C3C, title="Eskişehir'de hava durumu:", description=hava
+    )
+    await ctx.send(embed=embed)
+
 
 @bot.command()
 async def kys(ctx):
-    await ctx.send("Sayonara")
+    embed = discord.Embed(color=0xE74C3C, description="Sayonara...")
+    await ctx.send(embed=embed)
     await bot.close()
 
+
 @bot.command()
-async def benzeranime(ctx, *, name: str):
-    n,out=benzeranimeoner(ctx=ctx, name=name)
-    await ctx.send(f"{n} animesine benzer animeler: {out}")
+async def anime(ctx, *, query=None):
+
+    if query is None:
+        title, poster_image, description, episode_count, rating_rank = process_data()
+    else:
+        if get_anime_data(search_anime(query=query)) is None:
+            errorEmbed=discord.Embed(
+                color=0xE74C3C,
+                description="Anime bulunamadı!"
+            )
+            await ctx.send(embed=errorEmbed)
+            return
+        title, poster_image, description, episode_count, rating_rank = get_anime_data(search_anime(query=query))
+
+    embed=discord.Embed(
+        color=0xE74C3C,
+        title=title,
+        description=description
+    )
+    embed.set_image(url=poster_image)
+    embed.add_field(name="Episodes", value=episode_count, inline=True)
+    embed.add_field(name="Ranked", value=rating_rank, inline=True)
+    await ctx.send(embed=embed)
+
 
 bot.run(token=token)
