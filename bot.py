@@ -7,7 +7,7 @@ import random
 
 keep_alive()
 
-token=os.environ.get('token')
+token = os.environ.get("token")
 
 intents = discord.Intents.default()
 intents.guilds = True
@@ -16,7 +16,7 @@ intents.messages = True
 intents.message_content = True
 intents.members = True
 
-bot = commands.Bot(command_prefix="/",intents=intents)
+bot = commands.Bot(command_prefix="/", intents=intents)
 
 
 def get_waifu():
@@ -88,27 +88,30 @@ def get_random_anime():
     json_data = response.json()
     return json_data
 
+
 def extract_data(json_data):
     try:
-        title = json_data['data']['attributes']['canonicalTitle']
-        poster_image = json_data['data']['attributes']['posterImage']['original']
-        description = json_data['data']['attributes']['description']
-        episode_count = json_data['data']['attributes']['episodeCount']
-        rating_rank = json_data['data']['attributes']['ratingRank']
+        title = json_data["data"]["attributes"]["canonicalTitle"]
+        poster_image = json_data["data"]["attributes"]["posterImage"]["original"]
+        description = json_data["data"]["attributes"]["description"]
+        episode_count = json_data["data"]["attributes"]["episodeCount"]
+        rating_rank = json_data["data"]["attributes"]["ratingRank"]
         return title, poster_image, description, episode_count, rating_rank
     except KeyError:
         return None
-    
+
+
 def get_anime_data(json_data):
     try:
-        title = json_data['data'][0]['attributes']['canonicalTitle']
-        poster_image = json_data['data'][0]['attributes']['posterImage']['original']
-        description = json_data['data'][0]['attributes']['description']
-        episode_count = json_data['data'][0]['attributes']['episodeCount']
-        rating_rank = json_data['data'][0]['attributes']['ratingRank']
+        title = json_data["data"][0]["attributes"]["canonicalTitle"]
+        poster_image = json_data["data"][0]["attributes"]["posterImage"]["original"]
+        description = json_data["data"][0]["attributes"]["description"]
+        episode_count = json_data["data"][0]["attributes"]["episodeCount"]
+        rating_rank = json_data["data"][0]["attributes"]["ratingRank"]
         return title, poster_image, description, episode_count, rating_rank
     except (KeyError, IndexError):
         return None
+
 
 def process_data():
     while True:
@@ -116,7 +119,8 @@ def process_data():
         data = extract_data(json_data)
         if data is not None:
             return data
-        
+
+
 def search_anime(query):
     url = f"https://kitsu.io/api/edge/anime?filter[text]={query}"
     response = requests.get(url)
@@ -126,7 +130,8 @@ def search_anime(query):
     else:
         return None
 
-@bot.command(description="Makima ile tanış")
+
+@bot.command(name="makima", description="Makima ile tanış")
 async def makima(ctx):
     embed = discord.Embed(
         title=f"Emrediyorum, benimle anlaşma yapmak istediğini söyle {ctx.author.name}-kun!",
@@ -137,7 +142,7 @@ async def makima(ctx):
     await ctx.reply(embed=embed)
 
 
-@bot.command(description="Random waifu spawnla")
+@bot.command(name="waifu", description="Random waifu spawnla")
 async def waifu(ctx):
     embed = discord.Embed(color=0xE74C3C)
     embed.set_image(url=get_waifu())
@@ -145,7 +150,7 @@ async def waifu(ctx):
     await ctx.reply(embed=embed)
 
 
-@bot.command(description="Random waifu spawnla ama nsfw")
+@bot.command(name="nsfw", description="Random waifu spawnla ama nsfw")
 async def nsfw(ctx):
     if ctx.channel.nsfw:
         embed = discord.Embed(color=0xE74C3C)
@@ -158,14 +163,14 @@ async def nsfw(ctx):
         await ctx.reply(embed=embed)
 
 
-@bot.command(description="Avatarını göster")
+@bot.command(name="avatar", description="Avatarını göster")
 async def avatar(ctx):
     embed = discord.Embed(color=0xE74C3C)
     embed.set_image(url=ctx.author.avatar.url)
     await ctx.reply(embed=embed)
 
 
-@bot.command(description="Eskişehir hava durumu")
+@bot.command(name="hava", description="Eskişehir hava durumu")
 async def hava(ctx):
     temperature_celsius, weather_condition = get_hava()
     hava = f"{temperature_celsius} C°\n{get_hava_metni(weather_condition)}"
@@ -175,33 +180,30 @@ async def hava(ctx):
     await ctx.reply(embed=embed)
 
 
-@bot.command(description="Botu üldürmek için sadece acil durumlarda kullanın")
+@bot.command(
+    name="kys", description="Botu üldürmek için sadece acil durumlarda kullanın"
+)
 async def kys(ctx):
     embed = discord.Embed(color=0xE74C3C, description="Sayonara...")
     await ctx.reply(embed=embed)
     await bot.close()
 
 
-@bot.command(description="Random veya ismi girilen animeyi getir")
+@bot.command(name="anime", description="Random veya ismi girilen animeyi getir")
 async def anime(ctx, *, isim=None):
 
     if isim is None:
         title, poster_image, description, episode_count, rating_rank = process_data()
     else:
         if get_anime_data(search_anime(query=isim)) is None:
-            errorEmbed=discord.Embed(
-                color=0xE74C3C,
-                description="Anime bulunamadı!"
-            )
+            errorEmbed = discord.Embed(color=0xE74C3C, description="Anime bulunamadı!")
             await ctx.reply(embed=errorEmbed)
             return
-        title, poster_image, description, episode_count, rating_rank = get_anime_data(search_anime(query=isim))
+        title, poster_image, description, episode_count, rating_rank = get_anime_data(
+            search_anime(query=isim)
+        )
 
-    embed=discord.Embed(
-        color=0xE74C3C,
-        title=title,
-        description=description
-    )
+    embed = discord.Embed(color=0xE74C3C, title=title, description=description)
     embed.set_image(url=poster_image)
     embed.add_field(name="Episodes", value=episode_count, inline=True)
     embed.add_field(name="Ranked", value=rating_rank, inline=True)
