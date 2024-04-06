@@ -4,6 +4,7 @@ import io
 import requests
 from discord.ext import commands
 from keep_alive import keep_alive
+from benzeranime import benzeranime
 
 keep_alive()
 
@@ -109,5 +110,9 @@ async def hava(ctx):
 async def kys(ctx):
     await ctx.send("Sayonara")
     await bot.close()
+
+@bot.command()
+async def benzeranime(ctx, *, name: str):
+    await ctx.send(f"{name} animesine benzer animeler:: {benzeranime(name=name)}")
 
 bot.run(token=token)
