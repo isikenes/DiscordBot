@@ -1,4 +1,6 @@
 flask
 discord
+discord.py
+discord-py-slash-command
 requests
 py-cord
