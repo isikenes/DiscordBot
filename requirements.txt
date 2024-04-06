@@ -1,5 +1,5 @@
 flask
 discord
 requests
-sklearn
+scikit-learn
 pandas
