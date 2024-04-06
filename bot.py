@@ -1,7 +1,6 @@
 import discord
 import os
 import requests
-from discord.ext import commands
 from keep_alive import keep_alive
 import random
 
@@ -16,7 +15,7 @@ intents.messages = True
 intents.message_content = True
 intents.members = True
 
-bot = commands.Bot(command_prefix="/", intents=intents)
+bot = discord.Bot(command_prefix="/", intents=intents)
 
 
 def get_waifu():
@@ -126,7 +125,7 @@ def search_anime(query):
     else:
         return None
 
-@bot.command(description="Makima ile tanış")
+@bot.slash_command(description="Makima ile tanış")
 async def makima(ctx):
     embed = discord.Embed(
         title=f"Emrediyorum, benimle anlaşma yapmak istediğini söyle {ctx.author.name}-kun!",
@@ -137,7 +136,7 @@ async def makima(ctx):
     await ctx.send(embed=embed)
 
 
-@bot.command(description="Random waifu spawnla")
+@bot.slash_command(description="Random waifu spawnla")
 async def waifu(ctx):
     embed = discord.Embed(color=0xE74C3C)
     embed.set_image(url=get_waifu())
@@ -145,7 +144,7 @@ async def waifu(ctx):
     await ctx.send(embed=embed)
 
 
-@bot.command("Random waifu spawnla ama nsfw")
+@bot.slash_command("Random waifu spawnla ama nsfw")
 async def nsfw(ctx):
     if ctx.channel.nsfw:
         embed = discord.Embed(color=0xE74C3C)
@@ -158,14 +157,14 @@ async def nsfw(ctx):
         await ctx.send(embed=embed)
 
 
-@bot.command("Avatarını göster")
+@bot.slash_command("Avatarını göster")
 async def avatar(ctx):
     embed = discord.Embed(color=0xE74C3C)
     embed.set_image(url=ctx.author.avatar.url)
     await ctx.send(embed=embed)
 
 
-@bot.command("Eskişehir hava durumu")
+@bot.slash_command("Eskişehir hava durumu")
 async def hava(ctx):
     temperature_celsius, weather_condition = get_hava()
     hava = f"{temperature_celsius} C°\n{get_hava_metni(weather_condition)}"
@@ -175,14 +174,14 @@ async def hava(ctx):
     await ctx.send(embed=embed)
 
 
-@bot.command("Botu üldürmek için sadece acil durumlarda kullanın")
+@bot.slash_command("Botu üldürmek için sadece acil durumlarda kullanın")
 async def kys(ctx):
     embed = discord.Embed(color=0xE74C3C, description="Sayonara...")
     await ctx.send(embed=embed)
     await bot.close()
 
 
-@bot.command("Random veya ismi girilen animeyi getir")
+@bot.slash_command("Random veya ismi girilen animeyi getir")
 async def anime(ctx, *, isim=None):
 
     if isim is None:
