@@ -16,7 +16,7 @@ intents.messages = True
 intents.message_content = True
 intents.members = True
 
-bot = discord.Bot(command_prefix="/",intents=intents)
+bot = commands.Bot(command_prefix="/",intents=intents)
 
 
 def get_waifu():
@@ -134,7 +134,7 @@ async def makima(ctx):
     )
     embed.set_image(url="https://pbs.twimg.com/media/EbDKI4gX0AUXzSO.jpg")
 
-    await ctx.respond(embed=embed)
+    await ctx.reply(embed=embed)
 
 
 @bot.slash_command(description="Random waifu spawnla")
@@ -142,7 +142,7 @@ async def waifu(ctx):
     embed = discord.Embed(color=0xE74C3C)
     embed.set_image(url=get_waifu())
 
-    await ctx.respond(embed=embed)
+    await ctx.reply(embed=embed)
 
 
 @bot.slash_command(description="Random waifu spawnla ama nsfw")
@@ -150,19 +150,19 @@ async def nsfw(ctx):
     if ctx.channel.nsfw:
         embed = discord.Embed(color=0xE74C3C)
         embed.set_image(url=get_nsfw())
-        await ctx.respond(embed=embed)
+        await ctx.reply(embed=embed)
     else:
         embed = discord.Embed(
             description="Bu komut sadece NSFW kanallarında çalışır!", color=0xE74C3C
         )
-        await ctx.respond(embed=embed)
+        await ctx.reply(embed=embed)
 
 
 @bot.slash_command(description="Avatarını göster")
 async def avatar(ctx):
     embed = discord.Embed(color=0xE74C3C)
     embed.set_image(url=ctx.author.avatar.url)
-    await ctx.respond(embed=embed)
+    await ctx.reply(embed=embed)
 
 
 @bot.slash_command(description="Eskişehir hava durumu")
@@ -172,13 +172,13 @@ async def hava(ctx):
     embed = discord.Embed(
         color=0xE74C3C, title="Eskişehir'de hava durumu:", description=hava
     )
-    await ctx.respond(embed=embed)
+    await ctx.reply(embed=embed)
 
 
 @bot.slash_command(description="Botu üldürmek için sadece acil durumlarda kullanın")
 async def kys(ctx):
     embed = discord.Embed(color=0xE74C3C, description="Sayonara...")
-    await ctx.respond(embed=embed)
+    await ctx.reply(embed=embed)
     await bot.close()
 
 
@@ -193,7 +193,7 @@ async def anime(ctx, *, isim=None):
                 color=0xE74C3C,
                 description="Anime bulunamadı!"
             )
-            await ctx.respond(embed=errorEmbed)
+            await ctx.reply(embed=errorEmbed)
             return
         title, poster_image, description, episode_count, rating_rank = get_anime_data(search_anime(query=isim))
 
@@ -205,7 +205,7 @@ async def anime(ctx, *, isim=None):
     embed.set_image(url=poster_image)
     embed.add_field(name="Episodes", value=episode_count, inline=True)
     embed.add_field(name="Ranked", value=rating_rank, inline=True)
-    await ctx.respond(embed=embed)
+    await ctx.reply(embed=embed)
 
 
 bot.run(token=token)
