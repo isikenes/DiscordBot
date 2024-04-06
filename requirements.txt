@@ -1,3 +1,5 @@
 flask
 discord
 requests
+sklearn
+pandas
