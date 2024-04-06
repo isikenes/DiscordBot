@@ -1,4 +1,5 @@
 import discord
+from discord.ext import commands
 import os
 import requests
 from keep_alive import keep_alive
@@ -8,14 +9,14 @@ keep_alive()
 
 token=os.environ.get('token')
 
-# intents = discord.Intents.default()
-# intents.guilds = True
-# intents.guild_messages = True
-# intents.messages = True
-# intents.message_content = True
-# intents.members = True
+intents = discord.Intents.default()
+intents.guilds = True
+intents.guild_messages = True
+intents.messages = True
+intents.message_content = True
+intents.members = True
 
-bot = discord.Bot()
+bot = discord.Bot(command_prefix="/",intents=intents)
 
 
 def get_waifu():
