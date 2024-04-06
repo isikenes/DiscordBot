@@ -126,7 +126,7 @@ def search_anime(query):
     else:
         return None
 
-@bot.slash_command(description="Makima ile tanış")
+@bot.command(description="Makima ile tanış")
 async def makima(ctx):
     embed = discord.Embed(
         title=f"Emrediyorum, benimle anlaşma yapmak istediğini söyle {ctx.author.name}-kun!",
@@ -137,7 +137,7 @@ async def makima(ctx):
     await ctx.reply(embed=embed)
 
 
-@bot.slash_command(description="Random waifu spawnla")
+@bot.command(description="Random waifu spawnla")
 async def waifu(ctx):
     embed = discord.Embed(color=0xE74C3C)
     embed.set_image(url=get_waifu())
@@ -145,7 +145,7 @@ async def waifu(ctx):
     await ctx.reply(embed=embed)
 
 
-@bot.slash_command(description="Random waifu spawnla ama nsfw")
+@bot.command(description="Random waifu spawnla ama nsfw")
 async def nsfw(ctx):
     if ctx.channel.nsfw:
         embed = discord.Embed(color=0xE74C3C)
@@ -158,14 +158,14 @@ async def nsfw(ctx):
         await ctx.reply(embed=embed)
 
 
-@bot.slash_command(description="Avatarını göster")
+@bot.command(description="Avatarını göster")
 async def avatar(ctx):
     embed = discord.Embed(color=0xE74C3C)
     embed.set_image(url=ctx.author.avatar.url)
     await ctx.reply(embed=embed)
 
 
-@bot.slash_command(description="Eskişehir hava durumu")
+@bot.command(description="Eskişehir hava durumu")
 async def hava(ctx):
     temperature_celsius, weather_condition = get_hava()
     hava = f"{temperature_celsius} C°\n{get_hava_metni(weather_condition)}"
@@ -175,14 +175,14 @@ async def hava(ctx):
     await ctx.reply(embed=embed)
 
 
-@bot.slash_command(description="Botu üldürmek için sadece acil durumlarda kullanın")
+@bot.command(description="Botu üldürmek için sadece acil durumlarda kullanın")
 async def kys(ctx):
     embed = discord.Embed(color=0xE74C3C, description="Sayonara...")
     await ctx.reply(embed=embed)
     await bot.close()
 
 
-@bot.slash_command(description="Random veya ismi girilen animeyi getir")
+@bot.command(description="Random veya ismi girilen animeyi getir")
 async def anime(ctx, *, isim=None):
 
     if isim is None:
