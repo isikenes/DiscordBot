@@ -126,7 +126,7 @@ def search_anime(query):
     else:
         return None
 
-@bot.command()
+@bot.command(description="Makima ile tanış")
 async def makima(ctx):
     embed = discord.Embed(
         title=f"Emrediyorum, benimle anlaşma yapmak istediğini söyle {ctx.author.name}-kun!",
@@ -137,7 +137,7 @@ async def makima(ctx):
     await ctx.send(embed=embed)
 
 
-@bot.command()
+@bot.command(description="Random waifu spawnla")
 async def waifu(ctx):
     embed = discord.Embed(color=0xE74C3C)
     embed.set_image(url=get_waifu())
@@ -145,7 +145,7 @@ async def waifu(ctx):
     await ctx.send(embed=embed)
 
 
-@bot.command()
+@bot.command("Random waifu spawnla ama nsfw")
 async def nsfw(ctx):
     if ctx.channel.nsfw:
         embed = discord.Embed(color=0xE74C3C)
@@ -158,14 +158,14 @@ async def nsfw(ctx):
         await ctx.send(embed=embed)
 
 
-@bot.command()
+@bot.command("Avatarını göster")
 async def avatar(ctx):
     embed = discord.Embed(color=0xE74C3C)
     embed.set_image(url=ctx.author.avatar.url)
     await ctx.send(embed=embed)
 
 
-@bot.command()
+@bot.command("Eskişehir hava durumu")
 async def hava(ctx):
     temperature_celsius, weather_condition = get_hava()
     hava = f"{temperature_celsius} C°\n{get_hava_metni(weather_condition)}"
@@ -175,27 +175,27 @@ async def hava(ctx):
     await ctx.send(embed=embed)
 
 
-@bot.command()
+@bot.command("Botu üldürmek için sadece acil durumlarda kullanın")
 async def kys(ctx):
     embed = discord.Embed(color=0xE74C3C, description="Sayonara...")
     await ctx.send(embed=embed)
     await bot.close()
 
 
-@bot.command()
-async def anime(ctx, *, query=None):
+@bot.command("Random veya ismi girilen animeyi getir")
+async def anime(ctx, *, isim=None):
 
-    if query is None:
+    if isim is None:
         title, poster_image, description, episode_count, rating_rank = process_data()
     else:
-        if get_anime_data(search_anime(query=query)) is None:
+        if get_anime_data(search_anime(query=isim)) is None:
             errorEmbed=discord.Embed(
                 color=0xE74C3C,
                 description="Anime bulunamadı!"
             )
             await ctx.send(embed=errorEmbed)
             return
-        title, poster_image, description, episode_count, rating_rank = get_anime_data(search_anime(query=query))
+        title, poster_image, description, episode_count, rating_rank = get_anime_data(search_anime(query=isim))
 
     embed=discord.Embed(
         color=0xE74C3C,
