@@ -3,7 +3,7 @@ from discord.ext import commands
 import os
 import requests
 from keep_alive import keep_alive
-import random
+import random as rand
 
 keep_alive()
 
@@ -16,7 +16,7 @@ intents.messages = True
 intents.message_content = True
 intents.members = True
 
-bot = commands.Bot(command_prefix="/", intents=intents)
+bot = commands.Bot(command_prefix="!", intents=intents, help_command=None)
 
 
 def get_waifu():
@@ -83,7 +83,7 @@ def get_hava_metni(kod):
 
 
 def get_random_anime():
-    anime_id = random.randint(1, 14000)
+    anime_id = rand.randint(1, 14000)
     response = requests.get(f"https://kitsu.io/api/edge/anime/{anime_id}")
     json_data = response.json()
     return json_data
@@ -184,9 +184,13 @@ async def hava(ctx):
     name="kys", description="Botu üldürmek için sadece acil durumlarda kullanın"
 )
 async def kys(ctx):
-    embed = discord.Embed(color=0xE74C3C, description="Sayonara...")
-    await ctx.reply(embed=embed)
-    await bot.close()
+    if ctx.author.name == "_vault_hunter_":
+        embed = discord.Embed(color=0xE74C3C, description="Sayonara...")
+        await ctx.reply(embed=embed)
+        await bot.close()
+    else:
+        embed = discord.Embed(color=0xE74C3C, description="Botu üldürme iznin yok!")
+        await ctx.reply(embed=embed)
 
 
 @bot.command(name="anime", description="Random veya ismi girilen animeyi getir")
@@ -209,5 +213,36 @@ async def anime(ctx, *, isim=None):
     embed.add_field(name="Ranked", value=rating_rank, inline=True)
     await ctx.reply(embed=embed)
 
+
+@bot.command(name="random", description="Seçeneklerden rastgele birini seçer")
+async def random(ctx, *, secenekler: str=None):
+
+    if secenekler is None:
+        errorEmbed=discord.Embed(color=0xE74C3C, description="En az 2 seçenek girin!")
+        await ctx.reply(embed=errorEmbed)
+        return
+
+    s=secenekler.split()
+    s=list(set(s))
+
+    if len(s) < 2:
+        errorEmbed=discord.Embed(color=0xE74C3C, description="En az 2 seçenek girin!")
+        await ctx.reply(embed=errorEmbed)
+        return
+
+    sec=rand.choice(s)
+    embed=discord.Embed(color=0xE74C3C, title="Seçtiğim seçenek: ", description=f"{sec.upper()}")
+    embed.set_image(url="https://media1.tenor.com/m/HGpVsyfgOgMAAAAC/wheel-of.gif")
+    await ctx.reply(embed=embed)
+
+
+@bot.command(name="help", description="Komutları gösterir")
+async def help(ctx):
+    embed = discord.Embed(title="Komut listesi", color=0xE74C3C)
+
+    for command in bot.commands:
+        embed.add_field(name=f"Komut: {command.name}", value=f"İşlevi: {command.description}", inline=False)
+
+    await ctx.send(embed=embed)
 
 bot.run(token=token)
