@@ -4,10 +4,13 @@ import os
 import requests
 from keep_alive import keep_alive
 import random as rand
+from googleapiclient.discovery import build
 
 keep_alive()
 
 token = os.environ.get("token")
+gkey=os.environ.get("gkey")
+cseid=os.environ.get("cseid")
 
 intents = discord.Intents.default()
 intents.guilds = True
@@ -17,7 +20,7 @@ intents.message_content = True
 intents.members = True
 
 bot = commands.Bot(command_prefix="!", intents=intents, help_command=None)
-
+embedColor=0xE74C3C
 
 def get_waifu():
     response = requests.get("https://api.waifu.pics/sfw/waifu")
@@ -129,45 +132,54 @@ def search_anime(query):
         return data
     else:
         return None
+    
+def search_image(query):
+    try:
+        service = build("customsearch", "v1", developerKey=gkey)
+        res = service.cse().list(q=query, cx=cseid, searchType='image', num=1).execute()
+        if 'items' in res:
+            return res['items'][0]['link']
+    except:
+        return None
 
 
 @bot.command(name="makima", description="Makima ile tanış")
 async def makima(ctx):
     embed = discord.Embed(
         title=f"Emrediyorum, benimle anlaşma yapmak istediğini söyle {ctx.author.name}-kun!",
-        color=0xE74C3C,
+        color=embedColor
     )
     embed.set_image(url="https://pbs.twimg.com/media/EbDKI4gX0AUXzSO.jpg")
 
-    await ctx.reply(embed=embed)
+    await ctx.send(embed=embed)
 
 
 @bot.command(name="waifu", description="Random waifu spawnla")
 async def waifu(ctx):
-    embed = discord.Embed(color=0xE74C3C)
+    embed = discord.Embed(color=embedColor)
     embed.set_image(url=get_waifu())
 
-    await ctx.reply(embed=embed)
+    await ctx.send(embed=embed)
 
 
 @bot.command(name="nsfw", description="Random waifu spawnla ama nsfw")
 async def nsfw(ctx):
     if ctx.channel.nsfw:
-        embed = discord.Embed(color=0xE74C3C)
+        embed = discord.Embed(color=embedColor)
         embed.set_image(url=get_nsfw())
-        await ctx.reply(embed=embed)
+        await ctx.send(embed=embed)
     else:
         embed = discord.Embed(
-            description="Bu komut sadece NSFW kanallarında çalışır!", color=0xE74C3C
+            description="Bu komut sadece NSFW kanallarında çalışır!", color=embedColor
         )
-        await ctx.reply(embed=embed)
+        await ctx.send(embed=embed)
 
 
-@bot.command(name="avatar", description="Avatarını göster")
+@bot.command(name="avatar", description="Avatarını gösterir")
 async def avatar(ctx):
-    embed = discord.Embed(color=0xE74C3C)
+    embed = discord.Embed(color=embedColor)
     embed.set_image(url=ctx.author.avatar.url)
-    await ctx.reply(embed=embed)
+    await ctx.send(embed=embed)
 
 
 @bot.command(name="hava", description="Eskişehir hava durumu")
@@ -175,9 +187,9 @@ async def hava(ctx):
     temperature_celsius, weather_condition = get_hava()
     hava = f"{temperature_celsius} C°\n{get_hava_metni(weather_condition)}"
     embed = discord.Embed(
-        color=0xE74C3C, title="Eskişehir'de hava durumu:", description=hava
+        color=embedColor, title="Eskişehir'de hava durumu:", description=hava
     )
-    await ctx.reply(embed=embed)
+    await ctx.send(embed=embed)
 
 
 @bot.command(
@@ -185,64 +197,79 @@ async def hava(ctx):
 )
 async def kys(ctx):
     if ctx.author.name == "_vault_hunter_":
-        embed = discord.Embed(color=0xE74C3C, description="Sayonara...")
-        await ctx.reply(embed=embed)
+        embed = discord.Embed(color=embedColor, description="Sayonara...")
+        await ctx.send(embed=embed)
         await bot.close()
     else:
-        embed = discord.Embed(color=0xE74C3C, description="Botu üldürme iznin yok!")
-        await ctx.reply(embed=embed)
+        embed = discord.Embed(color=embedColor, description="Botu üldürme iznin yok!")
+        await ctx.send(embed=embed)
 
 
-@bot.command(name="anime", description="Random veya ismi girilen animeyi getir")
+@bot.command(name="anime", description="Rastgele bir anime veya ismi girilen animeyi getir")
 async def anime(ctx, *, isim=None):
 
     if isim is None:
         title, poster_image, description, episode_count, rating_rank = process_data()
     else:
         if get_anime_data(search_anime(query=isim)) is None:
-            errorEmbed = discord.Embed(color=0xE74C3C, description="Anime bulunamadı!")
-            await ctx.reply(embed=errorEmbed)
+            errorEmbed = discord.Embed(color=embedColor, description="Anime bulunamadı!")
+            await ctx.send(embed=errorEmbed)
             return
         title, poster_image, description, episode_count, rating_rank = get_anime_data(
             search_anime(query=isim)
         )
 
-    embed = discord.Embed(color=0xE74C3C, title=title, description=description)
+    embed = discord.Embed(color=embedColor, title=title, description=description)
     embed.set_image(url=poster_image)
     embed.add_field(name="Episodes", value=episode_count, inline=True)
     embed.add_field(name="Ranked", value=rating_rank, inline=True)
-    await ctx.reply(embed=embed)
+    await ctx.send(embed=embed)
 
 
 @bot.command(name="random", description="Seçeneklerden rastgele birini seçer")
 async def random(ctx, *, secenekler: str=None):
 
     if secenekler is None:
-        errorEmbed=discord.Embed(color=0xE74C3C, description="En az 2 seçenek girin!")
-        await ctx.reply(embed=errorEmbed)
+        errorEmbed=discord.Embed(color=embedColor, description="En az 2 seçenek girin!")
+        await ctx.send(embed=errorEmbed)
         return
 
     s=secenekler.split()
     s=list(set(s))
 
     if len(s) < 2:
-        errorEmbed=discord.Embed(color=0xE74C3C, description="En az 2 seçenek girin!")
-        await ctx.reply(embed=errorEmbed)
+        errorEmbed=discord.Embed(color=embedColor, description="En az 2 seçenek girin!")
+        await ctx.send(embed=errorEmbed)
         return
 
     sec=rand.choice(s)
-    embed=discord.Embed(color=0xE74C3C, title="Seçtiğim seçenek: ", description=f"{sec.upper()}")
-    embed.set_image(url="https://media1.tenor.com/m/HGpVsyfgOgMAAAAC/wheel-of.gif")
-    await ctx.reply(embed=embed)
+    embed=discord.Embed(color=embedColor, title="Seçtiğim seçenek: ", description=f"{sec.upper()}")
+    embed.set_image(url="https://media1.tenor.com/m/gq8idcUwAk0AAAAd/chainsaw-man-makima-hands-chainsaw-man.gif")
+    await ctx.send(embed=embed)
 
 
 @bot.command(name="help", description="Komutları gösterir")
 async def help(ctx):
-    embed = discord.Embed(title="Komut listesi", color=0xE74C3C)
+    embed = discord.Embed(title="Komut listesi", color=embedColor)
 
     for command in bot.commands:
         embed.add_field(name=f"Komut: {command.name}", value=f"İşlevi: {command.description}", inline=False)
 
     await ctx.send(embed=embed)
+
+@bot.command(name="foto", description="Görsel arama yapar")
+async def foto(ctx, *, query=None):
+    if query is None:
+        errorEmbed = discord.Embed(color=embedColor, description="Görsel arama yapmak için sorgu girmen gerek!")
+        await ctx.send(embed=errorEmbed)
+    
+    image_url = search_image(query)
+    if image_url:
+        embed = discord.Embed(color=embedColor)
+        embed.set_image(url=image_url)
+        await ctx.send(embed=embed)
+    else:
+        errorEmbed = discord.Embed(color=embedColor, description="Görsel bulunmadı!")
+        await ctx.send(embed=errorEmbed)
 
 bot.run(token=token)

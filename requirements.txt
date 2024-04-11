@@ -2,3 +2,4 @@ flask
 discord
 requests
 py-cord
+google-api-python-client
