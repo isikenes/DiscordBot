@@ -141,6 +141,23 @@ def search_image(query):
             return res['items'][0]['link']
     except:
         return None
+    
+def get_card(query):
+    url = f"https://db.ygoprodeck.com/api/v7/cardinfo.php?name={query}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        try:
+            title=data['data'][0]['name']
+            desc=data['data'][0]['desc']
+            tip=data['data'][0]['type']
+            race=data['data'][0]['race']
+            img=data['data'][0]['card_images'][0]['image_url']
+            return title,desc,tip,race,img
+        except:
+            return None
+    else:
+        return None
 
 
 @bot.command(name="makima", description="Makima ile tanış")
@@ -269,7 +286,26 @@ async def foto(ctx, *, query=None):
         embed.set_image(url=image_url)
         await ctx.send(embed=embed)
     else:
-        errorEmbed = discord.Embed(color=embedColor, description="Görsel bulunmadı!")
+        errorEmbed = discord.Embed(color=embedColor, description="Görsel bulunamadı!")
         await ctx.send(embed=errorEmbed)
+
+@bot.command(name="yugioh", description="Girilen Yugioh kartının bilgilerini gösterir")
+async def yugioh(ctx, *, name=None):
+    if name is None:
+        errorEmbed = discord.Embed(color=embedColor, description="Kart bilgisi girilmedi!")
+        await ctx.send(embed=errorEmbed)
+        return
+
+    if get_card(name) is None:
+        errorEmbed = discord.Embed(color=embedColor, description="Kart bulunamadı!")
+        await ctx.send(embed=errorEmbed)
+        return
+
+    title,desc,tip,race,img=get_card(name)
+    embed=discord.Embed(color=embedColor, title=title, description=desc)
+    embed.add_field(name="Type: " ,value=tip, inline=True)
+    embed.add_field(name="Race: ",value=race,inline=True)
+    embed.set_image(url=img)
+    await ctx.send(embed=embed)
 
 bot.run(token=token)
