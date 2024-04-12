@@ -143,7 +143,7 @@ def search_image(query):
         return None
     
 def get_card(query):
-    url = f"https://db.ygoprodeck.com/api/v7/cardinfo.php?name={query}"
+    url = f"https://db.ygoprodeck.com/api/v7/cardinfo.php?fname={query}"
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
