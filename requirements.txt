@@ -4,4 +4,3 @@ requests
 py-cord
 google-api-python-client
 pytube
-elevenlabs

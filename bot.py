@@ -5,9 +5,6 @@ import requests
 from keep_alive import keep_alive
 import random as rand
 from pytube import YouTube
-from elevenlabs import Voice
-from elevenlabs.client import ElevenLabs
-import io
 from googleapiclient.discovery import build
 
 keep_alive()
@@ -15,7 +12,7 @@ keep_alive()
 token = os.environ.get("token")
 gkey = os.environ.get("gkey")
 cseid = os.environ.get("cseid")
-eleven_key=os.environ.get("eleven_key")
+wkey=os.environ.get("wkey")
 
 intents = discord.Intents.default()
 intents.guilds = True
@@ -26,14 +23,6 @@ intents.members = True
 
 bot = commands.Bot(command_prefix="!", intents=intents, help_command=None)
 embedColor = 0xE74C3C
-client=ElevenLabs(
-    api_key=eleven_key
-)
-VOICE_TYPE_MAPPING = {
-    "kiz1": "qKRN53Lk573XAhUO8SnB",
-    "kiz2": "LbzRMxs5MRauwrHmFCLl",
-    "chaddarby": "yrDMz47qnZxD5j7m1DcV"
-}
 
 def get_waifu():
     response = requests.get("https://api.waifu.pics/sfw/waifu")
@@ -49,53 +38,24 @@ def get_nsfw():
     return url
 
 
-def get_hava():
-    base_url = "https://api.open-meteo.com/v1/forecast"
-    params = {
-        "latitude": 39.8152,
-        "longitude": 30.5323,
-        "current": ["temperature_2m", "weather_code"],
-        "forecast_days": 1,
-    }
-    response = requests.get(base_url, params=params)
-    data = response.json()
-    temperature_celsius = data["current"]["temperature_2m"]
-    weather_condition = data["current"]["weather_code"]
-    return temperature_celsius, weather_condition
-
-
-def get_hava_metni(kod):
-    metin = {
-        0: "Açık gökyüzü",
-        1: "Genellikle açık gökyüzü",
-        2: "Parçalı bulutlu",
-        3: "Hava kapalı",
-        45: "Sis",
-        48: "Buzlanma ve sis",
-        51: "Çiseleme: Hafif yoğunluk",
-        53: "Çiseleme: Orta yoğunluk",
-        55: "Çiseleme: Yoğun",
-        56: "Donan Çiseleme: Hafif yoğunluk",
-        57: "Donan Çiseleme: Yoğun",
-        61: "Yağmur: Hafif yoğunluk",
-        63: "Yağmur: Orta yoğunluk",
-        65: "Yağmur: Şiddetli yoğunluk",
-        66: "Donan Yağmur: Hafif yoğunluk",
-        67: "Donan Yağmur: Şiddetli yoğunluk",
-        71: "Kar Yağışı: Hafif yoğunluk",
-        73: "Kar Yağışı: Orta yoğunluk",
-        75: "Kar Yağışı: Şiddetli yoğunluk",
-        77: "Kar Taneleri",
-        80: "Yağmur Yağışı: Hafif yoğunluk",
-        81: "Yağmur Yağışı: Orta yoğunluk",
-        82: "Yağmur Yağışı: Şiddetli yoğunluk",
-        85: "Kar Yağışı: Hafif yoğunluk",
-        86: "Kar Yağışı: Şiddetli yoğunluk",
-        95: "Gökgürültülü Fırtına: Hafif veya orta yoğunluk",
-        96: "Gökgürültülü Fırtına: Hafif dolu",
-        99: "Gökgürültülü Fırtına: Şiddetli dolu",
-    }
-    return metin.get(kod, "Bilinmeyen")
+def get_hava(city):
+    try:
+        base_url = "https://api.weatherapi.com/v1/current.json"
+        params = {
+            "key":wkey,
+            "q":city
+        }
+        response = requests.get(base_url, params=params)
+        data = response.json()
+        location=data["location"]["name"]
+        temp=data["current"]["temp_c"]
+        humidity=data["current"]["humidity"]
+        wind=data["current"]["wind_kph"]
+        condition=data["current"]["condition"]["text"]
+        image_url="http:"+data["current"]["condition"]["icon"]
+        return location, temp,humidity,wind,condition,image_url
+    except:
+        return None
 
 
 def get_random_anime():
@@ -223,13 +183,30 @@ async def avatar(ctx):
     await ctx.send(embed=embed)
 
 
-@bot.command(name="hava", description="Eskişehir hava durumu")
-async def hava(ctx):
-    temperature_celsius, weather_condition = get_hava()
-    hava = f"{temperature_celsius} C°\n{get_hava_metni(weather_condition)}"
+@bot.command(name="hava", description="Girilen şehrin hava durumunu gösterir")
+async def hava(ctx, *, city:str=None):
+    if city is None:
+        errorEmbed = discord.Embed(
+            color=embedColor, description="Şehir ismi girin!"
+        )
+        await ctx.send(embed=errorEmbed)
+        return
+    
+    if get_hava(city=city) is None:
+        errorEmbed = discord.Embed(
+            color=embedColor, description="Şehir bulunamadı!"
+        )
+        await ctx.send(embed=errorEmbed)
+        return
+
+    location, temp,humidity,wind,condition,image_url=get_hava(city=city)
+    
     embed = discord.Embed(
-        color=embedColor, title="Eskişehir'de hava durumu:", description=hava
+        color=embedColor, title=f"{location} hava durumu:", description=f"{condition}, {temp} C°"
     )
+    embed.add_field(name="Nem: ", value=humidity, inline=True)
+    embed.add_field(name="Rüzgar: ", value=f"{wind} km/h", inline=True)
+    embed.set_thumbnail(url=image_url)
     await ctx.send(embed=embed)
 
 
@@ -249,7 +226,7 @@ async def kys(ctx):
 @bot.command(
     name="anime", description="Rastgele bir anime veya ismi girilen animeyi getir"
 )
-async def anime(ctx, *, isim=None):
+async def anime(ctx, *, isim:str=None):
 
     if isim is None:
         title, poster_image, description, episode_count, rating_rank = process_data()
@@ -375,40 +352,5 @@ async def indir(ctx, youtube_url: str):
     
     embed = discord.Embed(color=embedColor,title="İndir", url=download_link)
     await ctx.send(embed=embed)
-
-
-
-@bot.command(name="ses", description="Metni sese dönüştür")
-async def ses(ctx, voice_type: str, *text: str):
-        
-    await ctx.defer()
-    voice_type = voice_type.lower()
-    if voice_type not in VOICE_TYPE_MAPPING:
-        errorEmbed = discord.Embed(
-            color=embedColor, description=f"Ses tipi bulunamadı! Ses tipleri: {VOICE_TYPE_MAPPING.keys()}"
-        )
-        await ctx.send(embed=errorEmbed)
-        return
-    
-    if text is None:
-        errorEmbed = discord.Embed(
-            color=embedColor, description="Metin girilmedi!"
-        )
-        await ctx.send(embed=errorEmbed)
-        return
-
-    selected_voice_id = VOICE_TYPE_MAPPING[voice_type]
-
-    message = " ".join(text)
-
-    output = client.generate(
-        text=message,
-        voice=Voice(voice_id=selected_voice_id),
-        model="eleven_multilingual_v2",
-    )
-
-    output_bytes = b"".join(output)
-    await ctx.send(file=discord.File(io.BytesIO(output_bytes), filename="ses.mp3"))
-
 
 bot.run(token=token)
