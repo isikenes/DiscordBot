@@ -385,7 +385,7 @@ async def ses(ctx, voice_type: str, *text: str):
     voice_type = voice_type.lower()
     if voice_type not in VOICE_TYPE_MAPPING:
         errorEmbed = discord.Embed(
-            color=embedColor, description=f"Ses tipi bulunamadı! Ses tipleri: {VOICE_TYPE_MAPPING.keys}"
+            color=embedColor, description=f"Ses tipi bulunamadı! Ses tipleri: {VOICE_TYPE_MAPPING.keys()}"
         )
         await ctx.send(embed=errorEmbed)
         return
