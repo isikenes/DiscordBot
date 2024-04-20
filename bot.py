@@ -30,9 +30,9 @@ client=ElevenLabs(
     api_key=eleven_key
 )
 VOICE_TYPE_MAPPING = {
-    "anime": "Savg1iTJeu4yrmCuEmvn",
-    "youngmale": "alMSnmMfBQWEfTP8MRcX",
-    "oldmale": "ZUplcRfjP3QAuWjHCeYy"
+    "animekizi": "Savg1iTJeu4yrmCuEmvn",
+    "genc": "alMSnmMfBQWEfTP8MRcX",
+    "ihtiyar": "ZUplcRfjP3QAuWjHCeYy"
 }
 
 def get_waifu():
@@ -172,6 +172,15 @@ def get_card(query):
         except:
             return None
     else:
+        return None
+    
+def generated_download_link(youtube_url):
+    try:
+        yt = YouTube(youtube_url)
+        stream = yt.streams.get_highest_resolution()
+        download_link = stream.url
+        return download_link
+    except Exception as e:
         return None
 
 
@@ -346,32 +355,46 @@ async def yugioh(ctx, *, name=None):
     await ctx.send(embed=embed)
 
 
-@bot.command(name="download", description="downloading link")
-async def downloadLink(ctx, youtube_url: str):
+@bot.command(name="indir", description="Girilen youtube videosunun indirme linkini atar")
+async def indir(ctx, youtube_url: str):
+    if youtube_url is None:
+        errorEmbed = discord.Embed(
+            color=embedColor, description="Youtube linki girilmedi!"
+        )
+        await ctx.send(embed=errorEmbed)
+        return
+    
     await ctx.defer()
     download_link = generated_download_link(youtube_url)
-    embed = discord.Embed(title="İndir", url=download_link)
-
+    if download_link is None:
+        errorEmbed = discord.Embed(
+            color=embedColor, description="Youtube linki bulunamadı!"
+        )
+        await ctx.send(embed=errorEmbed)
+        return
+    
+    embed = discord.Embed(color=embedColor,title="İndir", url=download_link)
     await ctx.send(embed=embed)
 
 
-def generated_download_link(youtube_url):
-    try:
-        yt = YouTube(youtube_url)
-        stream = yt.streams.get_highest_resolution()
-        download_link = stream.url
-        return download_link
-    except Exception as e:
-        print("Error:", e)
-        return None
 
-
-@bot.command(name="voice", description="Text to speech")
-async def voice(ctx, voice_type: str, *text: str):
+@bot.command(name="ses", description="Metni sese dönüştür")
+async def ses(ctx, voice_type: str, *text: str):
+        
     await ctx.defer()
     voice_type = voice_type.lower()
     if voice_type not in VOICE_TYPE_MAPPING:
-        await ctx.send("Invalid voice type.")
+        errorEmbed = discord.Embed(
+            color=embedColor, description=f"Ses tipi bulunamadı! Ses tipleri: {VOICE_TYPE_MAPPING.keys}"
+        )
+        await ctx.send(embed=errorEmbed)
+        return
+    
+    if text is None:
+        errorEmbed = discord.Embed(
+            color=embedColor, description="Metin girilmedi!"
+        )
+        await ctx.send(embed=errorEmbed)
         return
 
     selected_voice_id = VOICE_TYPE_MAPPING[voice_type]
@@ -385,7 +408,7 @@ async def voice(ctx, voice_type: str, *text: str):
     )
 
     output_bytes = b"".join(output)
-    await ctx.send(file=discord.File(io.BytesIO(output_bytes), filename="voice.mp3"))
+    await ctx.send(file=discord.File(io.BytesIO(output_bytes), filename="ses.mp3"))
 
 
 bot.run(token=token)
