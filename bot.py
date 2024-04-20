@@ -30,9 +30,9 @@ client=ElevenLabs(
     api_key=eleven_key
 )
 VOICE_TYPE_MAPPING = {
-    "animekizi": "Savg1iTJeu4yrmCuEmvn",
-    "genc": "alMSnmMfBQWEfTP8MRcX",
-    "ihtiyar": "ZUplcRfjP3QAuWjHCeYy"
+    "kiz1": "qKRN53Lk573XAhUO8SnB",
+    "kiz2": "LbzRMxs5MRauwrHmFCLl",
+    "chaddarby": "yrDMz47qnZxD5j7m1DcV"
 }
 
 def get_waifu():
